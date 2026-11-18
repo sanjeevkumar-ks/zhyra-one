@@ -1,0 +1,98 @@
+import { boolean, integer, jsonb, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+import type {
+  AudienceData,
+  BrandData,
+  BusinessProfileData,
+  CompetitorData,
+  ContentBrief,
+  ContentVersion,
+  FeaturedImage,
+  IntegrationState,
+  Section,
+} from "@/lib/types";
+
+export const workspaces = pgTable("workspaces", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  website: text("website").notNull(),
+  businessType: text("business_type").notNull().default("Ecommerce"),
+  industry: text("industry").notNull().default(""),
+  description: text("description").notNull().default(""),
+  location: text("location").notNull().default(""),
+  language: text("language").notNull().default("English"),
+  profile: jsonb("profile").$type<BusinessProfileData>().notNull(),
+  audience: jsonb("audience").$type<AudienceData>().notNull(),
+  competitors: jsonb("competitors").$type<CompetitorData[]>().notNull(),
+  goals: jsonb("goals").$type<{ selected: string[]; primary: string }>().notNull(),
+  brand: jsonb("brand").$type<BrandData>().notNull(),
+  integrations: jsonb("integrations").$type<IntegrationState>().notNull(),
+  mode: text("mode").notNull().default("simple"),
+  onboardingCompleted: boolean("onboarding_completed").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const topicGroups = pgTable("topic_groups", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull().default(""),
+  pillarTitle: text("pillar_title").notNull(),
+});
+
+export const keywords = pgTable("keywords", {
+  id: serial("id").primaryKey(),
+  keyword: text("keyword").notNull(),
+  volume: integer("volume").notNull(),
+  difficulty: integer("difficulty").notNull(),
+  intent: text("intent").notNull(),
+  position: integer("position"),
+  serpFeatures: jsonb("serp_features").$type<string[]>().notNull(),
+  targetUrl: text("target_url").notNull().default(""),
+  topicGroupId: integer("topic_group_id"),
+  tracked: boolean("tracked").notNull().default(false),
+  inPlanner: boolean("in_planner").notNull().default(false),
+  relevance: text("relevance").notNull().default("Medium"),
+  conversion: text("conversion").notNull().default("Medium"),
+  coverage: text("coverage").notNull().default("Missing"),
+});
+
+export const contentItems = pgTable("content_items", {
+  id: serial("id").primaryKey(),
+  type: text("type").notNull().default("article"),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().default(""),
+  primaryKeyword: text("primary_keyword").notNull().default(""),
+  secondaryKeywords: jsonb("secondary_keywords").$type<string[]>().notNull(),
+  topicGroupId: integer("topic_group_id"),
+  format: text("format").notNull().default("Guide"),
+  intent: text("intent").notNull().default("informational"),
+  owner: text("owner").notNull().default("Sanjeev Kumar"),
+  reviewer: text("reviewer").notNull().default("Arjun Mehta"),
+  status: text("status").notNull().default("planned"),
+  targetDate: text("target_date"),
+  destination: text("destination").notNull().default("WordPress"),
+  metaTitle: text("meta_title").notNull().default(""),
+  metaDescription: text("meta_description").notNull().default(""),
+  brief: jsonb("brief").$type<ContentBrief | null>(),
+  sections: jsonb("sections").$type<Section[]>().notNull(),
+  featuredImage: jsonb("featured_image").$type<FeaturedImage | null>(),
+  versions: jsonb("versions").$type<ContentVersion[]>().notNull(),
+  publishedVersion: integer("published_version").notNull().default(0),
+  externalUrl: text("external_url"),
+  cmsId: text("cms_id"),
+  imported: boolean("imported").notNull().default(false),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const publishingJobs = pgTable("publishing_jobs", {
+  id: serial("id").primaryKey(),
+  contentId: integer("content_id").notNull(),
+  title: text("title").notNull(),
+  destination: text("destination").notNull(),
+  status: text("status").notNull(),
+  externalUrl: text("external_url"),
+  cmsId: text("cms_id"),
+  idempotencyKey: text("idempotency_key").notNull(),
+  error: text("error"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
